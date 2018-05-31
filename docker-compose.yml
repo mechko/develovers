@@ -1,0 +1,47 @@
+version: '3.2'
+
+services:
+  yam-database:
+    image: yam-database:test
+    build: yam-database
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - yam-database:/var/lib/postgresql/data
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  yam-eae:
+    image: yam-eae:test
+    build: yam-eae
+    depends_on:
+      - yam-database
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  yam-search:
+    image: yam-search:test
+    build: yam-search
+    depends_on:
+      - yam-database
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  yam-webapp:
+    image: yam-webapp:test
+    build: yam-webapp
+    # let nobody decide on which port to bind
+    ports:
+      - "9001"
+    depends_on:
+      - yam-database
+      - yam-eae
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+volumes:
+  yam-database:
