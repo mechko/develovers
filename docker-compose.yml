@@ -30,18 +30,37 @@ services:
       restart_policy:
         condition: on-failure
 
-  yam-webapp:
+  webapp:
     image: yam-webapp:test
     build: yam-webapp
-    # let nobody decide on which port to bind
-    ports:
-      - "9001"
+    # remember, remember: dependencies not used when deploying stacks (compose only)
     depends_on:
       - yam-database
       - yam-eae
+    networks:
+      - default
+      - proxy
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.port=9001"
+        - "traefik.docker.network=proxy"
+
+  # this is for the reverse tunneling feature
+  yam-ssh:
+    image: yam-ssh:test
+    build: yam-ssh
+    ports:
+      - "22"
     deploy:
       restart_policy:
         condition: on-failure
 
 volumes:
   yam-database:
+networks:
+  proxy:
+   external:
+     name: proxy
