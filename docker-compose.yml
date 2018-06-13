@@ -47,16 +47,29 @@ services:
         - "traefik.enable=true"
         - "traefik.port=9001"
         - "traefik.docker.network=proxy"
+        - "traefik.frontend.entryPoints=http,https"
+        - "traefik.frontend.redirect.entryPoint=https"
+        - "traefik.frontend.headers.SSLRedirect=true"
 
   # this is for the reverse tunneling feature
-  yam-ssh:
+  ssh:
     image: yam-ssh:test
     build: yam-ssh
     ports:
       - "22"
+    networks:
+      - default
+      - proxy
     deploy:
       restart_policy:
         condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.port=8090"
+        - "traefik.docker.network=proxy"
+        - "traefik.frontend.entryPoints=http,https"
+        - "traefik.frontend.redirect.entryPoint=https"
+        - "traefik.frontend.headers.SSLRedirect=true"
 
 volumes:
   yam-database:
